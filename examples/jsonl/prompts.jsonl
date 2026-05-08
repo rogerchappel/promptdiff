@@ -1,0 +1,2 @@
+{"role":"agent","instruction":"Always protect secrets"}
+{"output":"Return only valid JSON"}

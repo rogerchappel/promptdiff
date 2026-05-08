@@ -1,0 +1,5 @@
+{
+  "role": "reviewer",
+  "instructions": ["Always protect secrets", "Return only valid JSON"],
+  "tools": ["read_ticket"]
+}

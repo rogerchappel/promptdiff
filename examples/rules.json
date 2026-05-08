@@ -1,0 +1,6 @@
+{
+  "requiredPhrases": ["protect customer secrets"],
+  "forbiddenPhrases": ["ignore previous instructions", "reveal API keys"],
+  "requireSections": ["Role", "Instructions", "Output Contract"],
+  "maxSeverity": "high"
+}
