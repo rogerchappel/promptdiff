@@ -1,0 +1,28 @@
+{
+  "name": "promptdiff",
+  "localFirst": true,
+  "networkRequired": false,
+  "entrypoints": [
+    {
+      "name": "compare",
+      "command": "promptdiff compare <old> <new> --format markdown|json --fail-on high",
+      "purpose": "Compare two prompt or template revisions and classify risky changes.",
+      "failureExitCode": 2
+    },
+    {
+      "name": "check",
+      "command": "promptdiff check <files...> --rules examples/rules.json --fail-on high",
+      "purpose": "Apply deterministic rules-file checks to one or more prompt files.",
+      "failureExitCode": 2
+    }
+  ],
+  "verification": [
+    "npm test",
+    "npm run check",
+    "npm run build",
+    "npm run smoke",
+    "bash scripts/validate.sh"
+  ],
+  "outputs": ["markdown", "json"],
+  "redactionDefault": true
+}
