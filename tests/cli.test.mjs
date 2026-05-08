@@ -20,3 +20,9 @@ test('cli examples flag prints copy-paste commands', () => {
   assert.match(run.stdout, /promptdiff compare/);
   assert.match(run.stdout, /promptdiff check/);
 });
+
+test('cli check explains unmatched globs', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'check', 'examples/prompts/none-*.md'], { encoding: 'utf8' });
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /did not match any files/);
+});
