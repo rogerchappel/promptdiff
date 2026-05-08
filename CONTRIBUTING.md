@@ -1,79 +1,45 @@
-# Contributing
+# Contributing to PromptDiff
 
-Thanks for helping improve `/Users/roger/Developer/my-opensource/promptdiff`.
+Thanks for helping keep prompt review boring, local, and dependable.
 
-This project values small, reviewable contributions with clear verification.
+## Development setup
 
-## Issues
-
-Before opening an issue:
-
-- Search existing issues.
-- Confirm the issue applies to `/Users/roger/Developer/my-opensource/promptdiff`.
-- Include enough context for maintainers to understand or reproduce the request.
-
-Bug reports should include:
-
-- What happened.
-- What you expected.
-- Steps to reproduce.
-- Relevant logs, screenshots, or files.
-- The smallest verification step that demonstrates the issue.
-
-Feature requests should include:
-
-- The use case.
-- Why the current project does not solve it.
-- Risks or compatibility concerns.
-- Suggested files or behavior that may need to change.
-
-## Pull Requests
-
-Pull requests should:
-
-- Focus on one reviewable intent.
-- Use a branch.
-- Follow Conventional Commits.
-- Include tests or verification appropriate to the change.
-- Update documentation when behavior or usage changes.
-- Avoid unrelated formatting or dependency churn.
-- Avoid secrets, private contact details, and project-specific sensitive information.
-
-## Review Pack
-
-Use this format for meaningful changes:
-
-```md
-## Review Pack
-Repo:
-Branch:
-PR:
-Task:
-Status: done / blocked / needs review
-Summary:
-Commits:
-Files changed:
-Verification:
-Risk level:
-Rollback plan:
-Human decision needed:
-Next recommended task:
+```bash
+npm install
+npm run check
+npm test
+npm run build
+npm run smoke
+bash scripts/validate.sh
 ```
 
-## Verification
+## Contribution principles
 
-Every contribution should include verification.
+- Keep the default path local-first: no telemetry, no network calls, no hidden writes.
+- Prefer deterministic heuristics over cleverness.
+- Add fixtures for every new classifier or renderer behavior.
+- Keep reports stable enough for snapshot-like review.
+- Redact secret-like values before rendering unless a caller explicitly disables redaction.
 
-Examples:
+## Adding a classifier
 
-- Documentation: inspect rendered Markdown or review the diff.
-- Tests: run the targeted test command.
-- Types: run the project typecheck.
-- Build: run the smallest build command that covers the change.
-- Manual QA: provide exact steps and observed result.
+1. Add a focused fixture under `examples/`.
+2. Add or update a test under `tests/`.
+3. Keep severity choices explainable in the finding detail.
+4. Update the README if users need to know about the new category.
 
-If verification cannot be run, explain why and provide the exact command maintainers should run.
+## Commit style
 
-## Maintainer Review
+Use Conventional Commits, for example:
 
-Maintainers may request narrower scope, clearer verification, additional tests, or safer defaults before merging.
+- `feat: detect tool surface expansion`
+- `fix: keep jsonl normalization stable`
+- `test: cover rules fail-on behavior`
+- `docs: add ci usage example`
+
+## Pull request checklist
+
+- [ ] The change is local-first and deterministic.
+- [ ] Tests or smoke coverage were added where useful.
+- [ ] `npm run check`, `npm test`, `npm run build`, and `npm run smoke` pass.
+- [ ] Documentation was updated for user-visible behavior.
