@@ -91,6 +91,7 @@ async function runCheck(args: ParsedArgs): Promise<number> {
   if (args.positionals.length === 0) throw new Error('check requires at least one file.');
   const redact = args.flags.get('redact') !== false;
   const files = await expandInputs(args.positionals);
+  if (files.length === 0) throw new Error('check did not match any files.');
   const prompts = await Promise.all(files.map((file) => readPrompt(file, redact)));
   const rules = await readRules(flagString(args.flags, 'rules'));
   const failOn = parseSeverity(flagString(args.flags, 'fail-on'), rules.maxSeverity);
