@@ -5,10 +5,10 @@ This file defines how AI agents and human maintainers should work in `/Users/rog
 ## Project Context
 
 - Project: `/Users/roger/Developer/my-opensource/promptdiff`
-- Repository: ``
-- Primary maintainer: ``
-- Default branch: ``
-- Package manager: ``
+- Repository: `rogerchappel/promptdiff`
+- Primary maintainer: `Roger Chappel`
+- Default branch: `main`
+- Package manager: `npm`
 - Primary verification command: `bash scripts/validate.sh`
 
 ## Core Principle
@@ -17,8 +17,8 @@ Move quickly, but keep every change reviewable, reversible, verifiable, and safe
 
 ## Branch Policy
 
-- Work on a branch for all repository changes.
-- Branch from the latest `` before editing.
+- Prefer branches for normal repository changes.
+- Branch from the latest `main` before editing unless the maintainer explicitly requests direct-to-main work.
 - Do not merge without explicit maintainer approval.
 - Do not rewrite shared history unless explicitly instructed.
 
