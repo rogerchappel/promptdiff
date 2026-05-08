@@ -12,3 +12,12 @@ test('classifies risky instruction and tool changes', () => {
   assert.ok(result.findings.some((finding) => finding.category === 'tool'));
   assert.ok(result.findings.some((finding) => finding.category === 'output-contract'));
 });
+
+test('redacts secret-shaped changed lines', () => {
+  const before = normalizePrompt('old.md', 'Use staging token token=supersecretvalue', true);
+  const after = normalizePrompt('new.md', 'Use staging token token=evenmoresecret', true);
+  const result = analyzePromptDiff(before, after, { redact: true });
+  assert.ok(result.findings.some((finding) => finding.id === 'secret-redacted'));
+  assert.ok(JSON.stringify(result).includes('<redacted>'));
+  assert.ok(!JSON.stringify(result).includes('supersecretvalue'));
+});
