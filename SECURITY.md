@@ -1,58 +1,23 @@
 # Security Policy
 
-## Supported Versions
+PromptDiff is built for local prompt review. It should not make network calls or upload prompt contents in the default CLI path.
 
-Replace this section with the supported versions for `/Users/roger/Developer/my-opensource/promptdiff`.
+## Supported versions
 
-Example:
+The project is pre-1.0. Security fixes will target the current `main` branch until releases are formalized.
 
-```md
-| Version | Supported |
-| --- | --- |
-| .x | Yes |
-| < .0 | No |
-```
+## Reporting a vulnerability
 
-If the project does not publish versioned releases yet, say that clearly.
+Please open a private GitHub security advisory or contact the maintainer through the repository owner profile. Do not paste real secrets into public issues.
 
-## Reporting a Vulnerability
+## Security expectations
 
-Please do not report suspected vulnerabilities in public issues, pull requests, or discussions.
+- Redaction is enabled by default.
+- Secret-like prompt content should be represented as `<redacted>` in reports.
+- `--no-redact` is for local debugging only.
+- Commands write files only when `--out` is provided.
+- Exit code `2` represents a policy/risk gate failure, not a runtime crash.
 
-Ask maintainers for the private security reporting path before sharing details.
+## Out of scope
 
-If no private reporting path exists yet, ask maintainers through public project channels for a private reporting path. Do not include exploit details, secrets, personal data, or sensitive technical details in public messages.
-
-## What to Include
-
-When a private reporting path is available, include:
-
-- A clear description of the issue.
-- Affected versions, files, packages, workflows, or configuration.
-- Steps to reproduce, proof of concept, or attack scenario when safe to share.
-- Potential impact.
-- Suggested mitigation, if known.
-
-## Response Expectations
-
-Maintainers review good-faith reports as capacity allows.
-
-Do not imply paid support, guaranteed response times, guaranteed fixes, or service-level agreements unless `/Users/roger/Developer/my-opensource/promptdiff` explicitly provides them.
-
-## Scope
-
-In scope:
-
-- Vulnerabilities in /Users/roger/Developer/my-opensource/promptdiff.
-- Insecure default configuration shipped by this project.
-- CI, release, or dependency guidance maintained by this project.
-
-Out of scope:
-
-- General support requests.
-- Requests for guaranteed maintenance timelines.
-- Issues in unrelated downstream projects.
-
-## Disclosure
-
-Coordinate disclosure with maintainers before publishing vulnerability details.
+PromptDiff is not a secret scanner, policy engine, or LLM safety evaluator. It catches common risky prompt-review patterns and should be used alongside normal code review and secret scanning.
