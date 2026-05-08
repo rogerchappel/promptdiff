@@ -13,3 +13,10 @@ test('cli check passes safe fixture rules', () => {
   assert.equal(run.status, 0);
   assert.match(run.stdout, /PromptDiff Rules Check/);
 });
+
+test('cli examples flag prints copy-paste commands', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', '--examples'], { encoding: 'utf8' });
+  assert.equal(run.status, 0);
+  assert.match(run.stdout, /promptdiff compare/);
+  assert.match(run.stdout, /promptdiff check/);
+});
