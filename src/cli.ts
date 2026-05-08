@@ -102,7 +102,7 @@ async function runCheck(args: ParsedArgs): Promise<number> {
 
 export async function main(argv = process.argv.slice(2)): Promise<number> {
   const args = parseArgs(argv);
-  if (!args.command || args.command === '--help' || args.command === '-h') {
+  if (!args.command || args.command === '--help' || args.command === '-h' || args.command === '--examples') {
     process.stdout.write(help());
     return 0;
   }
