@@ -107,6 +107,14 @@ npm run smoke
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
 
+For a compact demo that writes Markdown and JSON review reports from the checked-in `v1` and `v2` fixtures:
+
+```sh
+bash demo/review-output-contract-change.sh
+```
+
+See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
+
 ## Development
 
 ```bash
