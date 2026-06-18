@@ -113,6 +113,14 @@ For a runnable version that writes both Markdown and JSON review artifacts, run:
 bash demo/tool-expansion-review.sh
 ```
 
+For a compact demo that writes Markdown and JSON review reports from the checked-in `v1` and `v2` fixtures:
+
+```sh
+bash demo/review-output-contract-change.sh
+```
+
+See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
+
 ## Development
 
 ```bash
