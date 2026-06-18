@@ -26,6 +26,13 @@ Show a prompt review where a normal-looking support-agent edit broadens tool acc
 4. Show the generated Markdown report and name the categories PromptDiff caught.
 5. Close with the limitation: PromptDiff is deterministic and heuristic, so reviewers still make the final call.
 
+For a fixture-backed script that also writes JSON and checks the high-risk exit
+code, run:
+
+```bash
+bash demo/tool-expansion-review.sh
+```
+
 ## Short hooks
 
 - "Your prompt diff can change tool access without looking dramatic."
