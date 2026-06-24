@@ -116,6 +116,14 @@ bash demo/tool-expansion-review.sh
 The script writes Markdown, JSON, and rules-check outputs under
 `/tmp/promptdiff-demo` or `$TMPDIR/promptdiff-demo`.
 
+For a compact demo that writes Markdown and JSON review reports from the checked-in `v1` and `v2` fixtures:
+
+```sh
+bash demo/review-output-contract-change.sh
+```
+
+See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
+
 ## Development
 
 ```bash

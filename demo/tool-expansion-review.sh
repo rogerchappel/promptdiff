@@ -1,39 +1,45 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT_DIR="${TMPDIR:-/tmp}/promptdiff-demo"
-MARKDOWN_OUT="$OUT_DIR/tool-expansion.md"
-JSON_OUT="$OUT_DIR/tool-expansion.json"
-CHECK_OUT="$OUT_DIR/rules-check.json"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+out_dir="${TMPDIR:-/tmp}/promptdiff-demo"
+check_out="$out_dir/rules-check.json"
 
-mkdir -p "$OUT_DIR"
-cd "$ROOT_DIR"
+cd "$repo_root"
+rm -rf "$out_dir"
+mkdir -p "$out_dir"
 
 npm run build
 
+set +e
 node dist/cli.js compare \
   examples/prompts/tool-expansion-old.md \
   examples/prompts/tool-expansion-new.md \
-  --out "$MARKDOWN_OUT"
+  --out "$out_dir/tool-expansion.md" \
+  --fail-on high
+compare_status=$?
+set -e
 
 node dist/cli.js compare \
   examples/prompts/tool-expansion-old.md \
   examples/prompts/tool-expansion-new.md \
-  --format json > "$JSON_OUT"
+  --format json \
+  --out "$out_dir/tool-expansion.json"
 
 node dist/cli.js check \
   examples/prompts/safe.md \
   --rules examples/rules.json \
   --fail-on high \
-  --format json > "$CHECK_OUT"
+  --format json > "$check_out"
 
-test -s "$MARKDOWN_OUT"
-test -s "$JSON_OUT"
-test -s "$CHECK_OUT"
-grep -q "tool" "$MARKDOWN_OUT"
-grep -q "findings" "$JSON_OUT"
+test "$compare_status" -ne 0
+test -s "$out_dir/tool-expansion.md"
+test -s "$out_dir/tool-expansion.json"
+test -s "$check_out"
+grep -q "PromptDiff Compare Report" "$out_dir/tool-expansion.md"
+grep -q '"highestSeverity"' "$out_dir/tool-expansion.json"
 
-echo "Markdown review: $MARKDOWN_OUT"
-echo "JSON comparison: $JSON_OUT"
-echo "Rules check: $CHECK_OUT"
+echo "Markdown review report: $out_dir/tool-expansion.md"
+echo "JSON review report: $out_dir/tool-expansion.json"
+echo "Rules check: $check_out"
+echo "Expected high-risk gate exit: $compare_status"
