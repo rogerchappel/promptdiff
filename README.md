@@ -124,6 +124,15 @@ bash demo/review-output-contract-change.sh
 
 See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
 
+To capture a rules-gate pass and an expected high-risk failure:
+
+```sh
+bash demo/rules-gate-smoke.sh
+```
+
+See [`docs/tutorials/rules-gate-smoke.md`](docs/tutorials/rules-gate-smoke.md)
+for the generated reports and review angle.
+
 ## Development
 
 ```bash
