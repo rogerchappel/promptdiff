@@ -1,10 +1,9 @@
-# Launch Note Draft
+# PromptDiff launch note draft
 
-PromptDiff is a local-first CLI for reviewing prompt and template changes with
-deterministic evidence.
-
-It focuses on concrete review signals that are easy to miss in a plain text
-diff:
+PromptDiff is a local-first CLI for reviewing prompt revisions like code. It
+compares Markdown, text, JSON, and JSONL prompt files, then reports risky
+instruction changes, tool-surface changes, output-contract changes, and removed
+guardrails.
 
 - risky instruction language
 - removed guardrails
@@ -15,20 +14,25 @@ diff:
 ## Demo
 
 ```sh
-bash demo/tool-expansion-review.sh
+npm install
+npm run build
+bash demo/review-tool-expansion.sh
 ```
 
-The demo compares the checked-in tool-expansion prompt pair, writes Markdown and
-JSON reports under `/tmp/promptdiff-demo`, and runs the example rules check
-against `examples/prompts/safe.md`.
+The demo uses the committed `examples/prompts/tool-expansion-old.md` and
+`examples/prompts/tool-expansion-new.md` files, then writes Markdown and JSON
+reports under `demo/output/`. The alternate `demo/tool-expansion-review.sh`
+script writes the same review angle under `/tmp/promptdiff-demo`.
 
-## Positioning
+## Useful proof points
 
-PromptDiff is useful when prompt changes need a pull-request appendix or a CI
-gate that explains what changed without sending prompts to a hosted service.
+- Runs locally with no telemetry or external network calls.
+- Redacts common secret-like values by default.
+- Produces deterministic Markdown or JSON for PR review.
+- Includes a `check` command for simple required phrase, forbidden phrase, and
+  required section gates.
 
-## Limitations
+## Limits to say plainly
 
-PromptDiff is a deterministic heuristic tool, not an LLM judge. Reviewers should
-use its report as evidence for manual review, not as a claim that every semantic
-change was understood.
+PromptDiff is deterministic and heuristic. It is useful review evidence, not an
+LLM judge, and reviewers should still read the underlying prompt change.
