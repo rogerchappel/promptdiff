@@ -107,6 +107,17 @@ npm run smoke
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
 
+To generate the walkthrough evidence in one command:
+
+```bash
+npm run build
+bash demo/review-tool-expansion.sh
+```
+
+The script writes Markdown and JSON reports under `demo/output/`. A
+promotion-ready launch note draft lives in
+[`docs/promo/launch-note.md`](docs/promo/launch-note.md).
+
 ## Development
 
 ```bash
