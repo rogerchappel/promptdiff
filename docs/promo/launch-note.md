@@ -5,6 +5,12 @@ compares Markdown, text, JSON, and JSONL prompt files, then reports risky
 instruction changes, tool-surface changes, output-contract changes, and removed
 guardrails.
 
+- risky instruction language
+- removed guardrails
+- tool-surface changes
+- output-contract changes
+- secret-like values, redacted by default
+
 ## Demo
 
 ```sh
@@ -15,7 +21,8 @@ bash demo/review-tool-expansion.sh
 
 The demo uses the committed `examples/prompts/tool-expansion-old.md` and
 `examples/prompts/tool-expansion-new.md` files, then writes Markdown and JSON
-reports under `demo/output/`.
+reports under `demo/output/`. The alternate `demo/tool-expansion-review.sh`
+script writes the same review angle under `/tmp/promptdiff-demo`.
 
 ## Useful proof points
 
