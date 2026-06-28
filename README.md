@@ -144,6 +144,12 @@ bash demo/rules-gate-smoke.sh
 See [`docs/tutorials/rules-gate-smoke.md`](docs/tutorials/rules-gate-smoke.md)
 for the generated reports and review angle.
 
+To generate the tool-expansion review artifacts in one command:
+
+```bash
+bash demo/run-tool-expansion-review.sh
+```
+
 ## Development
 
 ```bash
