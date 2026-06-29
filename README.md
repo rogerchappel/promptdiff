@@ -107,6 +107,15 @@ npm run smoke
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
 
+For a release-gate style demo that writes review artifacts to a temporary directory, run:
+
+```bash
+npm run build
+bash examples/release-gate-demo.sh
+```
+
+The demo intentionally expects the compare command to exit `2` because `--fail-on high` catches the risky prompt expansion. See [`docs/tutorials/prompt-release-gate.md`](docs/tutorials/prompt-release-gate.md) for the walkthrough and [`docs/promo/release-gate-social-hooks.md`](docs/promo/release-gate-social-hooks.md) for grounded launch copy.
+
 ## Development
 
 ```bash
