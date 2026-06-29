@@ -116,6 +116,49 @@ bash examples/release-gate-demo.sh
 
 The demo intentionally expects the compare command to exit `2` because `--fail-on high` catches the risky prompt expansion. See [`docs/tutorials/prompt-release-gate.md`](docs/tutorials/prompt-release-gate.md) for the walkthrough and [`docs/promo/release-gate-social-hooks.md`](docs/promo/release-gate-social-hooks.md) for grounded launch copy.
 
+To generate the walkthrough evidence in one command:
+
+```bash
+npm run build
+bash demo/review-tool-expansion.sh
+```
+
+The script writes Markdown and JSON reports under `demo/output/`. A
+promotion-ready launch note draft lives in
+[`docs/promo/launch-note.md`](docs/promo/launch-note.md).
+
+You can also run the same scenario as a fixture-backed demo script:
+
+```bash
+bash demo/tool-expansion-review.sh
+```
+
+The script writes Markdown, JSON, and rules-check outputs under
+`/tmp/promptdiff-demo` or `$TMPDIR/promptdiff-demo`.
+
+For a compact demo that writes Markdown and JSON review reports from the checked-in `v1` and `v2` fixtures:
+
+```sh
+bash demo/review-output-contract-change.sh
+```
+
+See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
+
+To capture a rules-gate pass and an expected high-risk failure:
+
+```sh
+bash demo/rules-gate-smoke.sh
+```
+
+See [`docs/tutorials/rules-gate-smoke.md`](docs/tutorials/rules-gate-smoke.md)
+for the generated reports and review angle.
+
+To generate the tool-expansion review artifacts in one command:
+
+```bash
+bash demo/run-tool-expansion-review.sh
+```
+
 ## Development
 
 ```bash
