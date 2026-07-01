@@ -107,16 +107,57 @@ npm run smoke
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
 
-For a repeatable demo that writes Markdown, JSON, and rules-check reports to a
-temporary directory, run:
+For a release-gate style demo that writes review artifacts to a temporary directory, run:
+
+```bash
+npm run build
+bash examples/release-gate-demo.sh
+```
+
+The demo intentionally expects the compare command to exit `2` because `--fail-on high` catches the risky prompt expansion. See [`docs/tutorials/prompt-release-gate.md`](docs/tutorials/prompt-release-gate.md) for the walkthrough and [`docs/promo/release-gate-social-hooks.md`](docs/promo/release-gate-social-hooks.md) for grounded launch copy.
+
+To generate the walkthrough evidence in one command:
+
+```bash
+npm run build
+bash demo/review-tool-expansion.sh
+```
+
+The script writes Markdown and JSON reports under `demo/output/`. A
+promotion-ready launch note draft lives in
+[`docs/promo/launch-note.md`](docs/promo/launch-note.md).
+
+You can also run the same scenario as a fixture-backed demo script:
+
+```bash
+bash demo/tool-expansion-review.sh
+```
+
+The script writes Markdown, JSON, and rules-check outputs under
+`/tmp/promptdiff-demo` or `$TMPDIR/promptdiff-demo`.
+
+For a compact demo that writes Markdown and JSON review reports from the checked-in `v1` and `v2` fixtures:
+
+```sh
+bash demo/review-output-contract-change.sh
+```
+
+See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
+
+To capture a rules-gate pass and an expected high-risk failure:
+
+```sh
+bash demo/rules-gate-smoke.sh
+```
+
+See [`docs/tutorials/rules-gate-smoke.md`](docs/tutorials/rules-gate-smoke.md)
+for the generated reports and review angle.
+
+To generate the tool-expansion review artifacts in one command:
 
 ```bash
 bash demo/run-tool-expansion-review.sh
 ```
-
-Promotion notes grounded in this workflow live in
-[`docs/promo/launch-note.md`](docs/promo/launch-note.md) and
-[`docs/promo/social-hooks.md`](docs/promo/social-hooks.md).
 
 ## Development
 

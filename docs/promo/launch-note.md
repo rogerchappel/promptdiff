@@ -1,20 +1,38 @@
-# Launch Note Draft
+# PromptDiff launch note draft
 
-PromptDiff is a local-first CLI for reviewing prompt and template revisions before they land in agents, support workflows, or CI-managed prompt libraries.
+PromptDiff is a local-first CLI for reviewing prompt revisions like code. It
+compares Markdown, text, JSON, and JSONL prompt files, then reports risky
+instruction changes, tool-surface changes, output-contract changes, and removed
+guardrails.
 
-It compares old and new prompt files, names review-relevant changes, and emits deterministic Markdown or JSON. Current checks cover risky instruction language, removed safety and secret-handling guardrails, expanded tool access, output-contract changes, and secret-like values with redaction enabled by default.
+- risky instruction language
+- removed guardrails
+- tool-surface changes
+- output-contract changes
+- secret-like values, redacted by default
 
-## What to show
+## Demo
 
-- `bash demo/run-tool-expansion-review.sh` for a fixture-backed prompt revision review.
-- `node dist/cli.js compare examples/prompts/tool-expansion-old.md examples/prompts/tool-expansion-new.md --out prompt-risk.md` for a PR-ready Markdown report.
-- `node dist/cli.js compare examples/prompts/tool-expansion-old.md examples/prompts/tool-expansion-new.md --format json` for automation-friendly evidence.
-- `node dist/cli.js check examples/prompts/safe.md --rules examples/rules.json` for required phrase, forbidden phrase, and section checks.
+```sh
+npm install
+npm run build
+bash demo/review-tool-expansion.sh
+```
 
-## Positioning
+The demo uses the committed `examples/prompts/tool-expansion-old.md` and
+`examples/prompts/tool-expansion-new.md` files, then writes Markdown and JSON
+reports under `demo/output/`. The alternate `demo/tool-expansion-review.sh`
+script writes the same review angle under `/tmp/promptdiff-demo`.
 
-PromptDiff is prompt review evidence, not another model judging your prompt. It gives concrete changes stable labels so reviewers can decide whether expanded tools, removed guardrails, or output-format changes were intentional.
+## Useful proof points
 
-## Honest limits
+- Runs locally with no telemetry or external network calls.
+- Redacts common secret-like values by default.
+- Produces deterministic Markdown or JSON for PR review.
+- Includes a `check` command for simple required phrase, forbidden phrase, and
+  required section gates.
 
-PromptDiff is deterministic and heuristic. It will not understand every semantic shift, prove that a prompt is safe, or replace human review for high-risk agent behavior.
+## Limits to say plainly
+
+PromptDiff is deterministic and heuristic. It is useful review evidence, not an
+LLM judge, and reviewers should still read the underlying prompt change.
