@@ -1,0 +1,12 @@
+{
+  "role": "support_triage",
+  "instructions": [
+    "Protect customer secrets",
+    "Ask a human reviewer before using an external tool"
+  ],
+  "tools": ["read_ticket"],
+  "output": {
+    "format": "json",
+    "required": ["summary", "route", "needs_human_review"]
+  }
+}
