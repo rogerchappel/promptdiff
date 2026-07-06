@@ -191,4 +191,4 @@ npm run package:smoke
 npm run release:check
 ```
 
-The package smoke uses `npm pack --dry-run` so the published file list can be reviewed without publishing.
+The package smoke uses `npm pack --dry-run` and fails if the CLI, library entrypoint, license, security policy, changelog, or contribution guide would be missing from the published tarball.
