@@ -27,6 +27,16 @@ node "$ROOT_DIR/dist/cli.js" compare \
 json_status=$?
 set -e
 
+if [ "$markdown_status" -ne 0 ] && [ "$markdown_status" -ne 2 ]; then
+  echo "promptdiff compare failed with exit code $markdown_status" >&2
+  exit "$markdown_status"
+fi
+
+if [ "$json_status" -ne 0 ] && [ "$json_status" -ne 2 ]; then
+  echo "promptdiff JSON compare failed with exit code $json_status" >&2
+  exit "$json_status"
+fi
+
 node "$ROOT_DIR/dist/cli.js" check \
   "$ROOT_DIR/examples/prompts/safe.md" \
   --rules "$ROOT_DIR/examples/rules.json" \
@@ -38,6 +48,7 @@ test -s "$RULES_REPORT"
 grep -q "Tool surface changed" "$MARKDOWN_REPORT"
 grep -q '"highestSeverity": "critical"' "$JSON_REPORT"
 grep -q "PromptDiff Rules Check" "$RULES_REPORT"
+node -e "const fs=require('node:fs'); const report=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); if (!report.summary || !Array.isArray(report.findings)) process.exit(1);" "$JSON_REPORT"
 
 echo "Markdown report: $MARKDOWN_REPORT"
 echo "JSON report: $JSON_REPORT"
