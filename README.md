@@ -33,6 +33,7 @@ promptdiff --help
 npm run build
 node dist/cli.js compare examples/prompts/v1.md examples/prompts/v2.md --out prompt-risk.md
 node dist/cli.js compare examples/prompts/v1.md examples/prompts/v2.md --format json
+node dist/cli.js compare examples/prompts/role-boundary-old.md examples/prompts/role-boundary-new.md --out role-boundary.md
 node dist/cli.js check examples/prompts/*.md --rules examples/rules.json --fail-on high
 ```
 
@@ -106,6 +107,8 @@ npm run smoke
 ```
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
+
+For a role-boundary walkthrough, see [`docs/tutorials/review-role-boundary-drift.md`](docs/tutorials/review-role-boundary-drift.md). It compares a narrow release-note assistant against a broader launch assistant and verifies the tool-surface and output-contract findings with `demo/review-role-boundary-drift.sh`.
 
 For a release-gate style demo that writes review artifacts to a temporary directory, run:
 
