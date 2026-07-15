@@ -33,6 +33,7 @@ promptdiff --help
 npm run build
 node dist/cli.js compare examples/prompts/v1.md examples/prompts/v2.md --out prompt-risk.md
 node dist/cli.js compare examples/prompts/v1.md examples/prompts/v2.md --format json
+node dist/cli.js compare examples/prompts/role-boundary-old.md examples/prompts/role-boundary-new.md --out role-boundary.md
 node dist/cli.js check examples/prompts/*.md --rules examples/rules.json --fail-on high
 ```
 
@@ -107,7 +108,55 @@ npm run smoke
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
 
-For a one-command local demo that writes Markdown and JSON review artifacts:
+For a role-boundary walkthrough, see [`docs/tutorials/review-role-boundary-drift.md`](docs/tutorials/review-role-boundary-drift.md). It compares a narrow release-note assistant against a broader launch assistant and verifies the tool-surface and output-contract findings with `demo/review-role-boundary-drift.sh`.
+
+For a release-gate style demo that writes review artifacts to a temporary directory, run:
+
+```bash
+npm run build
+bash examples/release-gate-demo.sh
+```
+
+The demo intentionally expects the compare command to exit `2` because `--fail-on high` catches the risky prompt expansion. See [`docs/tutorials/prompt-release-gate.md`](docs/tutorials/prompt-release-gate.md) for the walkthrough and [`docs/promo/release-gate-social-hooks.md`](docs/promo/release-gate-social-hooks.md) for grounded launch copy.
+
+To generate the walkthrough evidence in one command:
+
+```bash
+npm run build
+bash demo/review-tool-expansion.sh
+```
+
+The script writes Markdown and JSON reports under `demo/output/`. A
+promotion-ready launch note draft lives in
+[`docs/promo/launch-note.md`](docs/promo/launch-note.md).
+
+You can also run the same scenario as a fixture-backed demo script:
+
+```bash
+bash demo/tool-expansion-review.sh
+```
+
+The script writes Markdown, JSON, and rules-check outputs under
+`/tmp/promptdiff-demo` or `$TMPDIR/promptdiff-demo`.
+
+For a compact demo that writes Markdown and JSON review reports from the checked-in `v1` and `v2` fixtures:
+
+```sh
+bash demo/review-output-contract-change.sh
+```
+
+See [`docs/tutorials/review-output-contract-change.md`](docs/tutorials/review-output-contract-change.md) for the full walkthrough.
+
+To capture a rules-gate pass and an expected high-risk failure:
+
+```sh
+bash demo/rules-gate-smoke.sh
+```
+
+See [`docs/tutorials/rules-gate-smoke.md`](docs/tutorials/rules-gate-smoke.md)
+for the generated reports and review angle.
+
+To generate the tool-expansion review artifacts in one command:
 
 ```bash
 bash demo/run-tool-expansion-review.sh
@@ -149,4 +198,4 @@ npm run package:smoke
 npm run release:check
 ```
 
-The package smoke uses `npm pack --dry-run` so the published file list can be reviewed without publishing.
+The package smoke uses `npm pack --dry-run` and fails if the CLI, library entrypoint, license, security policy, changelog, or contribution guide would be missing from the published tarball.

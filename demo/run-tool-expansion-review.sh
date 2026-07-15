@@ -34,5 +34,8 @@ fi
 grep -q "Tool" .tmp/promptdiff-demo/tool-expansion.md
 grep -q "highestSeverity" .tmp/promptdiff-demo/tool-expansion.json
 grep -q "PromptDiff" .tmp/promptdiff-demo/rules-check.md
+node -e "const fs=require('node:fs'); const report=JSON.parse(fs.readFileSync('.tmp/promptdiff-demo/tool-expansion.json','utf8')); if (!report.summary || !Array.isArray(report.findings)) process.exit(1);"
 
-printf 'Wrote PromptDiff demo artifacts under .tmp/promptdiff-demo\n'
+printf 'Markdown report: .tmp/promptdiff-demo/tool-expansion.md\n'
+printf 'JSON report: .tmp/promptdiff-demo/tool-expansion.json\n'
+printf 'Rules report: .tmp/promptdiff-demo/rules-check.md\n'
