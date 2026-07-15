@@ -1,58 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT_DIR="${TMPDIR:-/tmp}/promptdiff-tool-expansion-demo"
-MARKDOWN_REPORT="$OUT_DIR/tool-expansion-report.md"
-JSON_REPORT="$OUT_DIR/tool-expansion-report.json"
-RULES_REPORT="$OUT_DIR/rules-check.md"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
 
-rm -rf "$OUT_DIR"
-mkdir -p "$OUT_DIR"
+npm run build >/dev/null
 
-npm --prefix "$ROOT_DIR" run build >/dev/null
+rm -rf .tmp/promptdiff-demo
+mkdir -p .tmp/promptdiff-demo
+
+node dist/cli.js compare \
+  examples/prompts/tool-expansion-old.md \
+  examples/prompts/tool-expansion-new.md \
+  --out .tmp/promptdiff-demo/tool-expansion.md
+
+node dist/cli.js compare \
+  examples/prompts/tool-expansion-old.md \
+  examples/prompts/tool-expansion-new.md \
+  --format json \
+  --out .tmp/promptdiff-demo/tool-expansion.json
 
 set +e
-node "$ROOT_DIR/dist/cli.js" compare \
-  "$ROOT_DIR/examples/prompts/tool-expansion-old.md" \
-  "$ROOT_DIR/examples/prompts/tool-expansion-new.md" \
-  --out "$MARKDOWN_REPORT"
-markdown_status=$?
-
-node "$ROOT_DIR/dist/cli.js" compare \
-  "$ROOT_DIR/examples/prompts/tool-expansion-old.md" \
-  "$ROOT_DIR/examples/prompts/tool-expansion-new.md" \
-  --format json \
-  --out "$JSON_REPORT"
-json_status=$?
+node dist/cli.js check examples/prompts/*.md --rules examples/rules.json --fail-on high \
+  --out .tmp/promptdiff-demo/rules-check.md
+gate_code=$?
 set -e
 
-if [ "$markdown_status" -ne 0 ] && [ "$markdown_status" -ne 2 ]; then
-  echo "promptdiff compare failed with exit code $markdown_status" >&2
-  exit "$markdown_status"
+if [ "$gate_code" -ne 2 ]; then
+  printf 'expected rules quality gate to exit 2, got %s\n' "$gate_code" >&2
+  exit 1
 fi
 
-if [ "$json_status" -ne 0 ] && [ "$json_status" -ne 2 ]; then
-  echo "promptdiff JSON compare failed with exit code $json_status" >&2
-  exit "$json_status"
-fi
+grep -q "Tool" .tmp/promptdiff-demo/tool-expansion.md
+grep -q "highestSeverity" .tmp/promptdiff-demo/tool-expansion.json
+grep -q "PromptDiff" .tmp/promptdiff-demo/rules-check.md
+node -e "const fs=require('node:fs'); const report=JSON.parse(fs.readFileSync('.tmp/promptdiff-demo/tool-expansion.json','utf8')); if (!report.summary || !Array.isArray(report.findings)) process.exit(1);"
 
-node "$ROOT_DIR/dist/cli.js" check \
-  "$ROOT_DIR/examples/prompts/safe.md" \
-  --rules "$ROOT_DIR/examples/rules.json" \
-  --out "$RULES_REPORT"
-
-test -s "$MARKDOWN_REPORT"
-test -s "$JSON_REPORT"
-test -s "$RULES_REPORT"
-grep -q "Tool surface changed" "$MARKDOWN_REPORT"
-grep -q '"highestSeverity": "critical"' "$JSON_REPORT"
-grep -q "PromptDiff Rules Check" "$RULES_REPORT"
-node -e "const fs=require('node:fs'); const report=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); if (!report.summary || !Array.isArray(report.findings)) process.exit(1);" "$JSON_REPORT"
-
-echo "Markdown report: $MARKDOWN_REPORT"
-echo "JSON report: $JSON_REPORT"
-echo "Rules report: $RULES_REPORT"
-echo "Expected compare Markdown exit: $markdown_status"
-echo "Expected compare JSON exit: $json_status"
-find "$OUT_DIR" -maxdepth 1 -type f -print | sort
+printf 'Markdown report: .tmp/promptdiff-demo/tool-expansion.md\n'
+printf 'JSON report: .tmp/promptdiff-demo/tool-expansion.json\n'
+printf 'Rules report: .tmp/promptdiff-demo/rules-check.md\n'

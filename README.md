@@ -162,6 +162,10 @@ To generate the tool-expansion review artifacts in one command:
 bash demo/run-tool-expansion-review.sh
 ```
 
+See [`docs/tutorials/tool-expansion-quality-gate.md`](docs/tutorials/tool-expansion-quality-gate.md)
+for the quality-gate flow and [`docs/promo/social-hooks.md`](docs/promo/social-hooks.md)
+for grounded launch copy.
+
 ## Development
 
 ```bash
