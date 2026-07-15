@@ -107,6 +107,16 @@ npm run smoke
 
 For a reviewer-facing walkthrough, see [`docs/tutorials/review-agent-tool-expansion.md`](docs/tutorials/review-agent-tool-expansion.md). It demonstrates a prompt revision that expands browser and shell tool language, removes an explicit secret-handling guardrail, and changes the output contract.
 
+For a one-command local demo that writes Markdown and JSON review artifacts:
+
+```bash
+bash demo/run-tool-expansion-review.sh
+```
+
+See [`docs/tutorials/tool-expansion-quality-gate.md`](docs/tutorials/tool-expansion-quality-gate.md)
+for the quality-gate flow and [`docs/promo/social-hooks.md`](docs/promo/social-hooks.md)
+for grounded launch copy.
+
 ## Development
 
 ```bash
