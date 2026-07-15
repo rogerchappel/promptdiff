@@ -1,26 +1,26 @@
-# Social Hooks
+# PromptDiff Promotion Hooks
 
-These drafts are grounded in the current README, examples, and CLI behavior.
+## Grounded facts
 
-## Prompt Tool Review
+- PromptDiff compares prompt revisions from local files.
+- It emits Markdown or JSON reports.
+- It redacts common secret-like values by default.
+- It includes a `check` command backed by a JSON rules file.
+- It is deterministic and heuristic, not an LLM judge.
 
-Prompt edits can quietly change tool access, safety language, and output contracts.
+## Short posts
 
-PromptDiff gives those changes names in a local Markdown or JSON report, so reviewers can discuss the actual risk instead of eyeballing a wall of text.
+1. Prompt changes can expand tool access without looking dramatic. PromptDiff
+   turns that revision into a local review artifact.
+2. Treat prompts like code: compare revisions, name risky categories, and keep
+   a Markdown report with the PR.
+3. Demo angle: old support prompt, new tool-expanded prompt, one report showing
+   what changed and one rules gate that exits non-zero.
 
-Demo: compare `examples/prompts/tool-expansion-old.md` with `examples/prompts/tool-expansion-new.md`.
+## Video outline
 
-## CI Angle
-
-PromptDiff has two useful modes:
-
-- `compare` for prompt revision reports
-- `check` for required phrases, forbidden phrases, and section rules
-
-It is deterministic, local-first, and built for review evidence rather than scoring prompts with another model.
-
-## Limitation-Aware Post
-
-PromptDiff is not an LLM judge and does not claim to understand every semantic change.
-
-That is the point: it catches concrete review signals such as risky instruction language, removed guardrails, tool references, output-contract shifts, and secret-like values.
+1. Open `examples/prompts/tool-expansion-old.md`.
+2. Open `examples/prompts/tool-expansion-new.md`.
+3. Run `bash demo/run-tool-expansion-review.sh`.
+4. Show `.tmp/promptdiff-demo/tool-expansion.md`.
+5. Show the expected quality-gate exit behavior from the script.
