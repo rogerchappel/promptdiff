@@ -73,7 +73,9 @@ Checks one or more prompt files against a simple JSON rules file.
 promptdiff check prompts/*.md --rules promptdiff.rules.json --fail-on high
 ```
 
-Exit code `2` means the configured quality gate failed. Exit code `1` means a command/runtime error.
+Both commands parse options strictly. Unknown options and options missing their required values are errors, and `compare` accepts exactly two file arguments. For `check`, every file or glob supplied on the command line must match; PromptDiff does not emit a partial report when one input is unmatched.
+
+Exit code `0` means the command completed without tripping a gate. Exit code `2` means the configured quality gate failed. Exit code `1` means invalid command input or another runtime error; diagnostics are written to stderr.
 
 ## Supported inputs
 
