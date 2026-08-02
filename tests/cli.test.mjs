@@ -26,3 +26,45 @@ test('cli check explains unmatched globs', () => {
   assert.equal(run.status, 1);
   assert.match(run.stderr, /did not match any files/);
 });
+
+test('cli rejects unknown options', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'compare', 'examples/prompts/v1.md', 'examples/prompts/v2.md', '--bogus'], { encoding: 'utf8' });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, '');
+  assert.match(run.stderr, /Unknown option: --bogus/);
+});
+
+test('cli rejects options without values', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'check', 'examples/prompts/safe.md', '--rules'], { encoding: 'utf8' });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, '');
+  assert.match(run.stderr, /Option --rules requires a value/);
+});
+
+test('cli compare rejects extra positional arguments', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'compare', 'examples/prompts/v1.md', 'examples/prompts/v2.md', 'extra.md'], { encoding: 'utf8' });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, '');
+  assert.match(run.stderr, /compare requires exactly <old> and <new>/);
+});
+
+test('cli check rejects a mixed matched and unmatched input set', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'check', 'examples/prompts/safe.md', 'examples/prompts/missing-*.md', '--rules', 'examples/rules.json'], { encoding: 'utf8' });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, '');
+  assert.match(run.stderr, /input did not match any files: examples\/prompts\/missing-\*\.md/);
+});
+
+test('cli accepts documented compare option forms', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'compare', 'examples/prompts/v1.md', 'examples/prompts/v2.md', '--format', 'json', '--fail-on', 'high', '--no-redact'], { encoding: 'utf8' });
+  assert.equal(run.status, 2);
+  assert.doesNotThrow(() => JSON.parse(run.stdout));
+  assert.equal(run.stderr, '');
+});
+
+test('cli accepts documented check option forms', () => {
+  const run = spawnSync(process.execPath, ['dist/cli.js', 'check', 'examples/prompts/safe.md', '--rules', 'examples/rules.json', '--format=markdown', '--fail-on=high', '--no-redact'], { encoding: 'utf8' });
+  assert.equal(run.status, 0);
+  assert.match(run.stdout, /PromptDiff Rules Check/);
+  assert.equal(run.stderr, '');
+});
