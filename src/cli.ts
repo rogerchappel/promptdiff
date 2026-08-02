@@ -19,14 +19,23 @@ function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;
   const flags = new Map<string, string | boolean>();
   const positionals: string[] = [];
+  const valueOptions = new Set(['format', 'out', 'fail-on', ...(command === 'check' ? ['rules'] : [])]);
+  const booleanOptions = new Set(['no-redact']);
   for (let i = 0; i < rest.length; i += 1) {
     const arg = rest[i];
     if (arg.startsWith('--')) {
       const [key, inline] = arg.slice(2).split('=', 2);
-      if (key === 'no-redact') flags.set('redact', false);
-      else if (inline !== undefined) flags.set(key, inline);
-      else if (rest[i + 1] && !rest[i + 1].startsWith('--')) flags.set(key, rest[++i]);
-      else flags.set(key, true);
+      if (!valueOptions.has(key) && !booleanOptions.has(key)) throw new Error(`Unknown option: --${key}`);
+      if (booleanOptions.has(key)) {
+        if (inline !== undefined) throw new Error(`Option --${key} does not take a value.`);
+        flags.set('redact', false);
+      } else if (inline !== undefined && inline !== '') {
+        flags.set(key, inline);
+      } else if (inline === undefined && rest[i + 1] && !rest[i + 1].startsWith('--')) {
+        flags.set(key, rest[++i]);
+      } else {
+        throw new Error(`Option --${key} requires a value.`);
+      }
     } else {
       positionals.push(arg);
     }
@@ -70,14 +79,16 @@ async function expandInputs(inputs: string[]): Promise<string[]> {
     const pattern = input.slice(dir.length + 1).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
     const regex = new RegExp(`^${pattern}$`);
     const entries = await readdir(dir === '.' ? process.cwd() : dir);
-    expanded.push(...entries.filter((entry) => regex.test(entry)).map((entry) => join(dir, entry)).sort());
+    const matches = entries.filter((entry) => regex.test(entry)).map((entry) => join(dir, entry)).sort();
+    if (matches.length === 0) throw new Error(`check input did not match any files: ${input}`);
+    expanded.push(...matches);
   }
   return [...new Set(expanded)].sort();
 }
 
 async function runCompare(args: ParsedArgs): Promise<number> {
   const [oldPath, newPath] = args.positionals;
-  if (!oldPath || !newPath) throw new Error('compare requires <old> and <new>.');
+  if (!oldPath || !newPath || args.positionals.length !== 2) throw new Error('compare requires exactly <old> and <new>.');
   const redact = args.flags.get('redact') !== false;
   const [oldPrompt, newPrompt] = await Promise.all([readPrompt(oldPath, redact), readPrompt(newPath, redact)]);
   const failOn = parseSeverity(flagString(args.flags, 'fail-on'));
