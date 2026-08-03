@@ -73,7 +73,9 @@ Checks one or more prompt files against a simple JSON rules file.
 promptdiff check prompts/*.md --rules promptdiff.rules.json --fail-on high
 ```
 
-Both commands parse options strictly. Unknown options and options missing their required values are errors, and `compare` accepts exactly two file arguments. For `check`, every file or glob supplied on the command line must match; PromptDiff does not emit a partial report when one input is unmatched.
+Both commands parse options strictly. Unknown options and options missing their required values are errors, and `compare` accepts exactly two file arguments. For `check`, every file or glob supplied on the command line must match; PromptDiff does not emit a partial report when one input is unmatched. Globs support `*` and `?` within a path segment and recursive `**` matching, such as `examples/**/*.md`. Results are sorted and deduplicated before checking.
+
+The rules document must be a JSON object. `requiredPhrases`, `forbiddenPhrases`, and `requireSections`, when present, must be arrays containing only non-empty strings. `maxSeverity` must be one of `info`, `low`, `medium`, `high`, or `critical`. Invalid rules exit with code `1`, print a field-specific diagnostic to stderr, and do not emit a report.
 
 Exit code `0` means the command completed without tripping a gate. Exit code `2` means the configured quality gate failed. Exit code `1` means invalid command input or another runtime error; diagnostics are written to stderr.
 
