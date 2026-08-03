@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { mkdir, writeFile, readdir } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { mkdir, writeFile, readdir, stat } from 'node:fs/promises';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { analyzePromptDiff } from './analyzer.js';
 import { readPrompt } from './parser.js';
 import { renderCheckMarkdown, renderCompareMarkdown, renderJson } from './render.js';
@@ -68,18 +68,67 @@ async function writeOrPrint(content: string, out?: string): Promise<void> {
   await writeFile(out, content, 'utf8');
 }
 
+function globRegex(pattern: string): RegExp {
+  const normalized = pattern.split(sep).join('/');
+  let source = '';
+  for (let index = 0; index < normalized.length; index += 1) {
+    const char = normalized[index];
+    if (char === '*' && normalized[index + 1] === '*') {
+      index += 1;
+      if (normalized[index + 1] === '/') {
+        index += 1;
+        source += '(?:.*/)?';
+      } else {
+        source += '.*';
+      }
+    } else if (char === '*') {
+      source += '[^/]*';
+    } else if (char === '?') {
+      source += '[^/]';
+    } else {
+      source += char.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+    }
+  }
+  return new RegExp(`^${source}$`);
+}
+
+async function listFiles(root: string): Promise<string[]> {
+  const entries = await readdir(root, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries.sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0)) {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) files.push(...await listFiles(path));
+    else if (entry.isFile()) files.push(path);
+  }
+  return files;
+}
+
 async function expandInputs(inputs: string[]): Promise<string[]> {
   const expanded: string[] = [];
   for (const input of inputs) {
-    if (!input.includes('*')) {
-      expanded.push(input);
+    if (!/[*?]/.test(input)) {
+      try {
+        if (!(await stat(input)).isFile()) throw new Error();
+      } catch {
+        throw new Error(`check input did not match any files: ${input}`);
+      }
+      expanded.push(isAbsolute(input) ? input : relative(process.cwd(), resolve(input)));
       continue;
     }
-    const dir = dirname(input);
-    const pattern = input.slice(dir.length + 1).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-    const regex = new RegExp(`^${pattern}$`);
-    const entries = await readdir(dir === '.' ? process.cwd() : dir);
-    const matches = entries.filter((entry) => regex.test(entry)).map((entry) => join(dir, entry)).sort();
+    const firstMagic = input.search(/[*?]/);
+    const slash = Math.max(input.lastIndexOf('/', firstMagic), input.lastIndexOf(sep, firstMagic));
+    const root = resolve(slash === -1 ? '.' : input.slice(0, slash) || sep);
+    let candidates: string[] = [];
+    try {
+      candidates = await listFiles(root);
+    } catch {
+      // A missing static prefix is an unmatched pattern, handled below.
+    }
+    const regex = globRegex(resolve(input));
+    const matches = candidates
+      .filter((file) => regex.test(file.split(sep).join('/')))
+      .map((file) => isAbsolute(input) ? file : relative(process.cwd(), file))
+      .sort();
     if (matches.length === 0) throw new Error(`check input did not match any files: ${input}`);
     expanded.push(...matches);
   }
