@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 test('cli compare returns gate failure when fail-on threshold is met', () => {
   const run = spawnSync(process.execPath, ['dist/cli.js', 'compare', 'examples/prompts/v1.md', 'examples/prompts/v2.md', '--fail-on', 'high'], { encoding: 'utf8' });
@@ -53,6 +56,35 @@ test('cli check rejects a mixed matched and unmatched input set', () => {
   assert.equal(run.status, 1);
   assert.equal(run.stdout, '');
   assert.match(run.stderr, /input did not match any files: examples\/prompts\/missing-\*\.md/);
+});
+
+test('cli check expands recursive globs into sorted unique files', () => {
+  const run = spawnSync(process.execPath, [
+    'dist/cli.js', 'check', 'examples/**/*.md', './examples/prompts/safe.md',
+    '--format', 'json',
+  ], { encoding: 'utf8' });
+  assert.equal(run.status, 0);
+  assert.equal(run.stderr, '');
+  const report = JSON.parse(run.stdout);
+  assert.deepEqual(report.files, [...new Set(report.files)].sort());
+  assert.ok(report.files.includes('examples/README.md'));
+  assert.ok(report.files.includes('examples/prompts/safe.md'));
+});
+
+test('cli rejects malformed rules without emitting a report', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'promptdiff-cli-rules-'));
+  const rulesPath = join(directory, 'rules.json');
+  writeFileSync(rulesPath, JSON.stringify({ requireSections: [42] }));
+  try {
+    const run = spawnSync(process.execPath, [
+      'dist/cli.js', 'check', 'examples/prompts/safe.md', '--rules', rulesPath,
+    ], { encoding: 'utf8' });
+    assert.equal(run.status, 1);
+    assert.equal(run.stdout, '');
+    assert.match(run.stderr, /rules\.requireSections\[0\] must be a non-empty string/);
+  } finally {
+    rmSync(directory, { recursive: true });
+  }
 });
 
 test('cli accepts documented compare option forms', () => {

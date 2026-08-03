@@ -14,9 +14,37 @@ function makeFinding(id: string, title: string, detail: string, evidence: string
 export async function readRules(path?: string): Promise<RulesFile> {
   if (!path) return defaultRules;
   const raw = await readFile(path, 'utf8');
-  const parsed = JSON.parse(raw) as RulesFile;
-  if (parsed.maxSeverity) parseSeverity(parsed.maxSeverity);
-  return { ...defaultRules, ...parsed };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error('rules must contain valid JSON.');
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new Error('rules must be a JSON object.');
+  }
+
+  const rules = parsed as Record<string, unknown>;
+  for (const field of ['requiredPhrases', 'forbiddenPhrases', 'requireSections'] as const) {
+    const value = rules[field];
+    if (value === undefined) continue;
+    if (!Array.isArray(value)) throw new Error(`rules.${field} must be an array.`);
+    const invalidIndex = value.findIndex((item) => typeof item !== 'string' || item.trim().length === 0);
+    if (invalidIndex !== -1) throw new Error(`rules.${field}[${invalidIndex}] must be a non-empty string.`);
+  }
+  if (rules.maxSeverity !== undefined) {
+    if (typeof rules.maxSeverity !== 'string') {
+      throw new Error('rules.maxSeverity must be one of: info, low, medium, high, critical.');
+    }
+    try {
+      parseSeverity(rules.maxSeverity);
+    } catch {
+      throw new Error('rules.maxSeverity must be one of: info, low, medium, high, critical.');
+    }
+  }
+
+  const validated = rules as RulesFile;
+  return { ...defaultRules, ...validated };
 }
 
 function includesCaseInsensitive(text: string, needle: string): boolean {
