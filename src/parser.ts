@@ -3,6 +3,8 @@ import { extname } from 'node:path';
 import type { ParsedPrompt } from './types.js';
 import { redactText } from './redact.js';
 
+const comparisonLines = new WeakMap<ParsedPrompt, string[]>();
+
 function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
   if (value && typeof value === 'object') {
@@ -24,8 +26,7 @@ export function detectFormat(path: string, raw: string): ParsedPrompt['format'] 
   return 'text';
 }
 
-export function normalizePrompt(path: string, rawInput: string, redact = true): ParsedPrompt {
-  const raw = redact ? redactText(rawInput) : rawInput;
+function normalize(path: string, raw: string): Omit<ParsedPrompt, 'path'> {
   const format = detectFormat(path, raw);
   let normalized = raw.replace(/\r\n/g, '\n').trim();
 
@@ -42,7 +43,17 @@ export function normalizePrompt(path: string, rawInput: string, redact = true): 
   }
 
   const lines = normalized.split('\n').map((line) => line.trimEnd());
-  return { path, format, raw, normalized, lines };
+  return { format, raw, normalized, lines };
+}
+
+export function normalizePrompt(path: string, rawInput: string, redact = true): ParsedPrompt {
+  const parsed = { path, ...normalize(path, redact ? redactText(rawInput) : rawInput) };
+  if (redact) comparisonLines.set(parsed, normalize(path, rawInput).lines);
+  return parsed;
+}
+
+export function comparisonLinesFor(prompt: ParsedPrompt): string[] {
+  return comparisonLines.get(prompt) ?? prompt.lines;
 }
 
 export async function readPrompt(path: string, redact = true): Promise<ParsedPrompt> {

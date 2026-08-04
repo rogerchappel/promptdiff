@@ -1,4 +1,6 @@
 import { diffLines } from './diff.js';
+import { comparisonLinesFor } from './parser.js';
+import { redactText } from './redact.js';
 import { maxSeverity } from './severity.js';
 import type { CompareOptions, CompareResult, Finding, ParsedPrompt, Severity } from './types.js';
 
@@ -21,7 +23,13 @@ function removedSafety(removed: string[]): string[] {
 }
 
 export function analyzePromptDiff(oldPrompt: ParsedPrompt, newPrompt: ParsedPrompt, options: CompareOptions): CompareResult {
-  const diff = diffLines(oldPrompt.lines, newPrompt.lines);
+  const comparisonDiff = diffLines(comparisonLinesFor(oldPrompt), comparisonLinesFor(newPrompt));
+  const diff = options.redact
+    ? {
+        added: comparisonDiff.added.map(redactText),
+        removed: comparisonDiff.removed.map(redactText),
+      }
+    : comparisonDiff;
   const findings: Finding[] = [];
 
   const addedInstructions = select(diff.added, instructionWords);
