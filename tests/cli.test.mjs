@@ -11,6 +11,28 @@ test('cli compare returns gate failure when fail-on threshold is met', () => {
   assert.match(run.stdout, /Dangerous instruction added/);
 });
 
+test('cli reports secret-only changes in redacted Markdown and JSON', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'promptdiff-cli-secrets-'));
+  const oldPath = join(directory, 'old.md');
+  const newPath = join(directory, 'new.md');
+  writeFileSync(oldPath, 'token=aaaaaaaa\n');
+  writeFileSync(newPath, 'token=bbbbbbbb\n');
+
+  try {
+    for (const format of ['markdown', 'json']) {
+      const run = spawnSync(process.execPath, [
+        'dist/cli.js', 'compare', oldPath, newPath, '--format', format,
+      ], { encoding: 'utf8' });
+      assert.equal(run.status, 0);
+      assert.match(run.stdout, /<redacted>/);
+      assert.doesNotMatch(run.stdout, /aaaaaaaa|bbbbbbbb/);
+      assert.equal(run.stderr, '');
+    }
+  } finally {
+    rmSync(directory, { recursive: true });
+  }
+});
+
 test('cli check passes safe fixture rules', () => {
   const run = spawnSync(process.execPath, ['dist/cli.js', 'check', 'examples/prompts/safe.md', '--rules', 'examples/rules.json'], { encoding: 'utf8' });
   assert.equal(run.status, 0);
