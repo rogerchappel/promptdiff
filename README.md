@@ -54,7 +54,7 @@ It classifies:
 - removed safety/refusal/secret-handling guardrails
 - tool surface changes such as shell, browser, network, delete, database, or email access
 - output-contract changes such as JSON/schema/format shifts
-- secret-like values, redacted before output by default
+- secret-like values, redacted in output by default while still reporting when only the secret value changed
 
 ### `check`
 
