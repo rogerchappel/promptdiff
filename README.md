@@ -202,4 +202,6 @@ npm run package:smoke
 npm run release:check
 ```
 
-The package smoke uses `npm pack --dry-run` and fails if the CLI, library entrypoint, license, security policy, changelog, or contribution guide would be missing from the published tarball.
+The package smoke checks the tarball contents, installs that tarball into a clean temporary consumer, and invokes the installed CLI.
+
+Version releases are distributed through npm. Set `package.json` to the intended version, run `npm run release:tag -- v<version>` and `npm run release:check`, then push that exact tag. The tag workflow validates the tag again, publishes the public package to npm with provenance, and creates the GitHub release only after npm publication succeeds.

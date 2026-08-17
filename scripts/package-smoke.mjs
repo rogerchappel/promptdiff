@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const requiredFiles = [
   "dist/cli.js",
@@ -26,3 +29,16 @@ if (missing.length > 0) {
 }
 
 console.log(`Package smoke passed with ${pack.files.length} files.`);
+
+const consumer = mkdtempSync(join(tmpdir(), "promptdiff-package-smoke-"));
+try {
+  const tarball = execFileSync("npm", ["pack", "--silent"], { encoding: "utf8" }).trim();
+  execFileSync("npm", ["init", "--yes"], { cwd: consumer, stdio: "ignore" });
+  execFileSync("npm", ["install", join(process.cwd(), tarball)], { cwd: consumer, stdio: "inherit" });
+  const cli = join(consumer, "node_modules", ".bin", "promptdiff");
+  const help = execFileSync(cli, ["--help"], { cwd: consumer, encoding: "utf8" });
+  if (!help.includes("promptdiff compare")) throw new Error("Installed CLI help was not usable");
+  rmSync(join(process.cwd(), tarball));
+} finally {
+  rmSync(consumer, { recursive: true, force: true });
+}
