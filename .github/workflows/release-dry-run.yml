@@ -30,7 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Validate prospective release tag
-        run: npm run release:tag -- "v$(node -p \"require('./package.json').version\")"
+        run: |
+          prospective_tag="v$(node -p "require('./package.json').version")"
+          npm run release:tag -- "$prospective_tag"
       - name: Install ReleaseBox
         run: |
           set -euo pipefail

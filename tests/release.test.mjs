@@ -24,5 +24,17 @@ test("release workflow validates before publishing and publishes before GitHub r
 
 test("dry run validates a prospective package tag", () => {
   const workflow = readFileSync(".github/workflows/release-dry-run.yml", "utf8");
-  assert.match(workflow, /npm run release:tag -- "v\$\(node/);
+  const step = workflow.match(/- name: Validate prospective release tag\n {8}run: \|\n((?: {10}.*\n)+)/);
+  assert.ok(step, "prospective release tag step must use a shell block");
+
+  const command = step[1]
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => line.slice(10))
+    .join("\n");
+  const run = spawnSync("bash", ["-euo", "pipefail", "-c", command], { encoding: "utf8" });
+
+  assert.equal(run.status, 0, run.stderr);
+  assert.match(run.stdout, /Release tag v0\.1\.0 matches package version 0\.1\.0\./);
+  assert.ok(workflow.indexOf("Validate prospective release tag") < workflow.indexOf("Run release checks"));
 });
