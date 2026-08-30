@@ -204,4 +204,6 @@ npm run release:check
 
 The package smoke checks the tarball contents, installs that tarball into a clean temporary consumer, and invokes the installed CLI.
 
+Continuous integration runs the full `npm run release:check` suite on Node.js 20, 22, and 24. Node.js 20 is the package's declared minimum supported runtime, while 22 and 24 cover the current supported major releases.
+
 Version releases are distributed through npm. Set `package.json` to the intended version, run `npm run release:tag -- v<version>` and `npm run release:check`, then push that exact tag. The tag workflow validates the tag again, publishes the public package to npm with provenance, and creates the GitHub release only after npm publication succeeds.
