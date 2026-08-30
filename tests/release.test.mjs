@@ -22,6 +22,24 @@ test("release workflow validates before publishing and publishes before GitHub r
   assert.match(workflow, /permissions:\n  contents: write\n  id-token: write/);
 });
 
+test("CI covers the supported Node.js runtime matrix", () => {
+  const workflow = readFileSync(".github/workflows/ci.yml", "utf8");
+  const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+  const engineFloor = Number(packageJson.engines.node.match(/\d+/)?.[0]);
+  const matrix = workflow.match(/node-version:\s*\[([^\]]+)\]/)?.[1]
+    .split(",")
+    .map((version) => Number(version.trim()));
+
+  assert.deepEqual(matrix, [engineFloor, 22, 24]);
+  assert.match(workflow, /fail-fast:\s*false/);
+  assert.match(workflow, /name:\s*Repository hygiene \(Node \$\{\{ matrix\.node-version \}\}\)/);
+  assert.match(workflow, /uses:\s*actions\/setup-node@v\d+/);
+  assert.match(workflow, /node-version:\s*\$\{\{ matrix\.node-version \}\}/);
+  assert.match(workflow, /cache:\s*npm/);
+  assert.match(workflow, /run:\s*npm ci/);
+  assert.match(workflow, /run:\s*npm run release:check/);
+});
+
 test("dry run validates a prospective package tag", () => {
   const workflow = readFileSync(".github/workflows/release-dry-run.yml", "utf8");
   const step = workflow.match(/- name: Validate prospective release tag\n {8}run: \|\n((?: {10}.*\n)+)/);
