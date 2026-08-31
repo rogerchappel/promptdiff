@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { chmodSync, cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 test("release tag must exactly match package version", () => {
   for (const tag of [undefined, "0.1.0", "v0.1", "v9.9.9"]) {
@@ -10,6 +12,60 @@ test("release tag must exactly match package version", () => {
     assert.equal(run.status, 1, tag);
   }
   assert.equal(spawnSync(process.execPath, ["scripts/validate-release-tag.mjs", "v0.1.0"]).status, 0);
+});
+
+test("CLI version verification rejects package mismatches", () => {
+  const directory = mkdtempSync(join(tmpdir(), "promptdiff-version-check-"));
+  const cli = join(directory, "promptdiff");
+  const manifest = join(directory, "package.json");
+  try {
+    writeFileSync(manifest, JSON.stringify({ version: "9.8.7" }));
+    writeFileSync(cli, "#!/bin/sh\nprintf '9.8.7\\n'\n");
+    chmodSync(cli, 0o755);
+    let run = spawnSync(process.execPath, ["scripts/verify-cli-version.mjs", cli, manifest], { encoding: "utf8" });
+    assert.equal(run.status, 0, run.stderr);
+
+    writeFileSync(cli, "#!/bin/sh\nprintf '0.1.0\\n'\n");
+    run = spawnSync(process.execPath, ["scripts/verify-cli-version.mjs", cli, manifest], { encoding: "utf8" });
+    assert.equal(run.status, 1);
+    assert.match(run.stderr, /package\.json=9\.8\.7, CLI=0\.1\.0/);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("built and installed CLIs report a supplied package version", () => {
+  const directory = mkdtempSync(join(tmpdir(), "promptdiff-version-package-"));
+  const stage = join(directory, "stage");
+  const consumer = join(directory, "consumer");
+  try {
+    mkdirSync(stage);
+    cpSync("dist", join(stage, "dist"), { recursive: true });
+    writeFileSync(join(stage, "package.json"), JSON.stringify({
+      name: "promptdiff-version-fixture",
+      version: "9.8.7",
+      type: "module",
+      bin: { promptdiff: "./dist/cli.js" },
+      files: ["dist"],
+    }));
+
+    let run = spawnSync(process.execPath, [join(stage, "dist", "cli.js"), "--version"], { encoding: "utf8" });
+    assert.equal(run.status, 0, run.stderr);
+    assert.equal(run.stdout, "9.8.7\n");
+
+    const packed = spawnSync("npm", ["pack", "--silent"], { cwd: stage, encoding: "utf8" });
+    assert.equal(packed.status, 0, packed.stderr);
+    mkdirSync(consumer);
+    assert.equal(spawnSync("npm", ["init", "--yes"], { cwd: consumer, encoding: "utf8" }).status, 0);
+    const tarball = join(stage, packed.stdout.trim());
+    const install = spawnSync("npm", ["install", tarball], { cwd: consumer, encoding: "utf8" });
+    assert.equal(install.status, 0, install.stderr);
+    run = spawnSync(join(consumer, "node_modules", ".bin", "promptdiff"), ["--version"], { encoding: "utf8" });
+    assert.equal(run.status, 0, run.stderr);
+    assert.equal(run.stdout, "9.8.7\n");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("release workflow validates before publishing and publishes before GitHub release", () => {
