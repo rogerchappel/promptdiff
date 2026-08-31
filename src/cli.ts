@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from 'node:fs';
 import { mkdir, writeFile, readdir, stat } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { analyzePromptDiff } from './analyzer.js';
@@ -14,6 +15,10 @@ interface ParsedArgs {
   positionals: string[];
   flags: Map<string, string | boolean>;
 }
+
+const packageVersion = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+) as { version: string };
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;
@@ -168,7 +173,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     return 0;
   }
   if (args.command === '--version' || args.command === '-v') {
-    process.stdout.write('0.1.0\n');
+    process.stdout.write(`${packageVersion.version}\n`);
     return 0;
   }
   if (args.command === 'examples') {
