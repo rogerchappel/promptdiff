@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -91,6 +91,37 @@ test('cli check expands recursive globs into sorted unique files', () => {
   assert.deepEqual(report.files, [...new Set(report.files)].sort());
   assert.ok(report.files.includes('examples/README.md'));
   assert.ok(report.files.includes('examples/prompts/safe.md'));
+});
+
+test('cli check recursive globs skip dependency, VCS, and generated directories', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'promptdiff-cli-globs-'));
+  const cliPath = join(process.cwd(), 'dist', 'cli.js');
+  for (const path of ['prompts/nested', 'node_modules/example', '.git/objects', 'dist/generated']) {
+    mkdirSync(join(directory, path), { recursive: true });
+  }
+  writeFileSync(join(directory, 'prompts', 'own.md'), '# Own\n');
+  writeFileSync(join(directory, 'prompts', 'nested', 'second.md'), '# Second\n');
+  writeFileSync(join(directory, 'node_modules', 'example', 'README.md'), '# Dependency\n');
+  writeFileSync(join(directory, '.git', 'objects', 'fixture.md'), '# VCS\n');
+  writeFileSync(join(directory, 'dist', 'generated', 'output.md'), '# Generated\n');
+
+  try {
+    const run = spawnSync(process.execPath, [cliPath, 'check', '**/*.md', '--format', 'json'], {
+      cwd: directory,
+      encoding: 'utf8',
+    });
+    assert.equal(run.status, 0);
+    assert.equal(run.stderr, '');
+    assert.deepEqual(JSON.parse(run.stdout).files, ['prompts/nested/second.md', 'prompts/own.md']);
+
+    const explicit = spawnSync(process.execPath, [
+      cliPath, 'check', 'dist/generated/output.md', '--format', 'json',
+    ], { cwd: directory, encoding: 'utf8' });
+    assert.equal(explicit.status, 0);
+    assert.deepEqual(JSON.parse(explicit.stdout).files, ['dist/generated/output.md']);
+  } finally {
+    rmSync(directory, { recursive: true });
+  }
 });
 
 test('cli rejects malformed rules without emitting a report', () => {
