@@ -20,6 +20,8 @@ const packageVersion = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 ) as { version: string };
 
+const ignoredGlobDirectories = new Set(['.git', 'dist', 'node_modules']);
+
 function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;
   const flags = new Map<string, string | boolean>();
@@ -102,7 +104,7 @@ async function listFiles(root: string): Promise<string[]> {
   const files: string[] = [];
   for (const entry of entries.sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0)) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) files.push(...await listFiles(path));
+    if (entry.isDirectory() && !ignoredGlobDirectories.has(entry.name)) files.push(...await listFiles(path));
     else if (entry.isFile()) files.push(path);
   }
   return files;
